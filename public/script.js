@@ -1,8 +1,7 @@
 const socket = io('/')
 const videoGrid = document.getElementById('video-grid')
-console.log(videoGrid);
 const myVideo = document.createElement('video');
-myVideo.muted = false;
+
 
 var peer = new Peer(undefined, {
     path: '/peerjs',
@@ -10,7 +9,12 @@ var peer = new Peer(undefined, {
     port: '443'
 }); 
 
+
+
 let myVideoStream
+const myVideo = document.createElement('video');
+myVideo.muted = true;
+const peers = {}
 navigator.mediaDevices.getUserMedia({
     video: true,
     audio: true,
@@ -31,6 +35,22 @@ navigator.mediaDevices.getUserMedia({
         console.log('user connected');
         console.log(userId);
     })
+
+    let text = $("input");
+  // when press enter send message
+    $('html').keydown(function (e) {
+    if (e.which == 13 && text.val().length !== 0) {
+        console.log(text.val())
+      socket.emit('message', text.val());
+      text.val('')
+    }
+  });
+
+    socket.on('createmessage', message => {
+    $('ul').append(`<li class="messages"><b>User</b></br>${message}</li>`)      
+    scrolToBottom();
+
+})
 
 })
 
@@ -57,22 +77,10 @@ const addVideoStream = (video, stream) => {
       videoGrid.append(video)
 }
 
-let text = $("input");
-  // when press enter send message
-  $('html').keydown(function (e) {
-    if (e.which == 13 && text.val().length !== 0) {
-        console.log(text.val())
-      socket.emit('message', text.val());
-      text.val('')
-    }
-  });
 
 
-  socket.on('createmessage', message => {
-      $('ul').append(`<li class="messages"><b>User</b></br>${message}</li>`)      
-      scrolToBottom();
 
-  })
+  
 
 
   const scrolToBottom = () => {
